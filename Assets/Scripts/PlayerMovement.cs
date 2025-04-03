@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
 
     private Rigidbody rb;
     private Transform cam;
+    private float rotationSpeed = 700f;  // Rotation speed
 
     void Start()
     {
@@ -42,6 +43,20 @@ public class PlayerMovement : MonoBehaviour
         Vector3 velocity = moveDirection * speed;
         velocity.y = rb.linearVelocity.y; // Preserve the existing vertical velocity
         rb.linearVelocity = velocity;
+
+        // Only rotate if there is movement input and the movement direction is significant
+        if (moveDirection != Vector3.zero)
+        {
+            // Calculate the desired rotation (only around the Y-axis)
+            Quaternion toRotation = Quaternion.LookRotation(moveDirection);
+            Vector3 eulerRotation = toRotation.eulerAngles;
+            eulerRotation.x = 0; // Prevent rotation around X-axis
+            eulerRotation.z = 0; // Prevent rotation around Z-axis
+            toRotation = Quaternion.Euler(eulerRotation);
+
+            // Smooth rotation (limit to Y-axis rotation)
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+        }
     }
 
     void Jump()
